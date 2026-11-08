@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chorki QR Code Generator</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: #ffffff;
+            width: 100%;
+            max-width: 420px;
+            padding: 35px 25px;
+            border-radius: 14px;
+            text-align: center;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
+        }
+
+        .logo {
+            color: #e50914;
+            font-size: 34px;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+        h2 {
+            color: #222;
+            margin-bottom: 10px;
+        }
+
+        .description {
+            color: #777;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+
+        #qrcode {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 18px;
+            background: #ffffff;
+            border: 2px solid #000000;
+            border-radius: 10px;
+            width: fit-content;
+            margin: 0 auto 20px;
+        }
+
+        #qrcode img,
+        #qrcode canvas {
+            display: block;
+        }
+
+        .website {
+            color: #555;
+            font-size: 14px;
+            margin-bottom: 22px;
+            word-break: break-all;
+        }
+
+        button {
+            background: #e50914;
+            color: white;
+            border: none;
+            padding: 14px 25px;
+            width: 100%;
+            border-radius: 7px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #c40812;
+        }
+
+        .footer {
+            color: #999;
+            font-size: 11px;
+            margin-top: 22px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="logo">CHORKI</div>
+
+        <h2>Scan & Explore Chorki</h2>
+
+        <p class="description">
+            Scan this QR code to visit the official Chorki website.
+        </p>
+
+        <div id="qrcode"></div>
+
+        <p class="website">https://www.chorki.net/</p>
+
+        <button onclick="downloadQR()">
+            Download QR Code (PNG)
+        </button>
+
+        <p class="footer">
+            © Chorki | Official Website QR Code
+        </p>
+
+    </div>
+
+    <script>
+        // Permanent destination URL
+        const chorkiURL = "https://www.chorki.net/subscribe";
+
+        // Generate QR Code
+        const qr = new QRCode(
+            document.getElementById("qrcode"),
+            {
+                text: chorkiURL,
+                width: 250,
+                height: 250,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            }
+        );
+
+        // Download QR Code as PNG
+        function downloadQR() {
+    const canvas = document.querySelector("#qrcode canvas");
+
+    const border = 30;
+    const size = canvas.width + border * 2;
+
+    const output = document.createElement("canvas");
+    output.width = size;
+    output.height = size;
+
+    const ctx = output.getContext("2d");
+
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, size, size);
+
+    ctx.drawImage(canvas, border, border);
+
+    ctx.strokeStyle = "#000000";
+    ctx.lineWidth = 4;
+    ctx.strokeRect(2, 2, size - 4, size - 4);
+
+    const link = document.createElement("a");
+    link.download = "Chorki-Permanent-QR.png";
+    link.href = output.toDataURL("image/png");
+    link.click();
+}
+    </script>
+
+</body>
+
+</html>
