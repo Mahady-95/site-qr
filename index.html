@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -53,6 +54,53 @@
             margin-bottom: 25px;
         }
 
+        /* URL Input */
+
+        .input-group {
+            margin-bottom: 12px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            color: #333;
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 13px;
+            border: 1px solid #ddd;
+            border-radius: 7px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .input-group input:focus {
+            border-color: #e50914;
+        }
+
+        /* Generate Button */
+
+        .generate-btn {
+            background: #e50914;
+            color: white;
+            border: none;
+            padding: 14px 25px;
+            width: 100%;
+            border-radius: 7px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 22px;
+        }
+
+        .generate-btn:hover {
+            background: #c40812;
+        }
+
         #qrcode {
             display: flex;
             justify-content: center;
@@ -77,7 +125,7 @@
             word-break: break-all;
         }
 
-        button {
+        .download-btn {
             background: #e50914;
             color: white;
             border: none;
@@ -89,8 +137,15 @@
             cursor: pointer;
         }
 
-        button:hover {
+        .download-btn:hover {
             background: #c40812;
+        }
+
+        .error {
+            display: none;
+            color: #e50914;
+            font-size: 13px;
+            margin-bottom: 15px;
         }
 
         .footer {
@@ -110,14 +165,43 @@
         <h2>Scan & Explore Chorki</h2>
 
         <p class="description">
-            Scan this QR code to visit the official Chorki website.
+            Enter any website URL to generate a QR code.
         </p>
+
+        <!-- URL Input Field -->
+
+        <div class="input-group">
+
+            <label for="websiteURL">Website URL</label>
+
+            <input
+                type="text"
+                id="websiteURL"
+                value="https://www.chorki.net/subscribe"
+                placeholder="Enter website URL"
+            >
+
+        </div>
+
+        <!-- Generate QR Button -->
+
+        <button class="generate-btn" onclick="generateQR()">
+            Generate QR Code
+        </button>
+
+        <p class="error" id="error"></p>
+
+        <!-- QR Code -->
 
         <div id="qrcode"></div>
 
-        <p class="website">https://www.chorki.net/</p>
+        <p class="website" id="website">
+            https://www.chorki.net/subscribe
+        </p>
 
-        <button onclick="downloadQR()">
+        <!-- Download Button -->
+
+        <button class="download-btn" onclick="downloadQR()">
             Download QR Code (PNG)
         </button>
 
@@ -128,49 +212,147 @@
     </div>
 
     <script>
-        // Permanent destination URL
-        const chorkiURL = "https://www.chorki.net/subscribe";
+
+        // Default destination URL
+
+        let currentURL = "https://www.chorki.net/subscribe";
+
 
         // Generate QR Code
-        const qr = new QRCode(
-            document.getElementById("qrcode"),
-            {
-                text: chorkiURL,
+
+        function generateQR() {
+
+            const input = document.getElementById("websiteURL");
+            const qrContainer = document.getElementById("qrcode");
+            const error = document.getElementById("error");
+
+            let url = input.value.trim();
+
+            error.style.display = "none";
+
+            // Check empty input
+
+            if (!url) {
+                error.textContent = "Please enter a website URL.";
+                error.style.display = "block";
+                return;
+            }
+
+            // Automatically add HTTPS
+
+            if (!/^https?:\/\//i.test(url)) {
+                url = "https://" + url;
+            }
+
+            // Validate URL
+
+            try {
+
+                const parsedURL = new URL(url);
+
+                if (
+                    !["http:", "https:"].includes(parsedURL.protocol) ||
+                    !parsedURL.hostname.includes(".")
+                ) {
+                    throw new Error("Invalid URL");
+                }
+
+                currentURL = parsedURL.href;
+
+            } catch (e) {
+
+                error.textContent = "Please enter a valid website URL.";
+                error.style.display = "block";
+                return;
+
+            }
+
+            // Clear previous QR
+
+            qrContainer.innerHTML = "";
+
+            // Generate new QR
+
+            new QRCode(qrContainer, {
+                text: currentURL,
                 width: 250,
                 height: 250,
                 colorDark: "#000000",
                 colorLight: "#ffffff",
                 correctLevel: QRCode.CorrectLevel.H
-            }
-        );
+            });
+
+            // Update displayed website URL
+
+            document.getElementById("website").textContent = currentURL;
+
+        }
+
 
         // Download QR Code as PNG
+
         function downloadQR() {
-    const canvas = document.querySelector("#qrcode canvas");
 
-    const border = 30;
-    const size = canvas.width + border * 2;
+            const canvas = document.querySelector("#qrcode canvas");
 
-    const output = document.createElement("canvas");
-    output.width = size;
-    output.height = size;
+            if (!canvas) {
+                return;
+            }
 
-    const ctx = output.getContext("2d");
+            const border = 30;
+            const size = canvas.width + border * 2;
 
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, size, size);
+            const output = document.createElement("canvas");
 
-    ctx.drawImage(canvas, border, border);
+            output.width = size;
+            output.height = size;
 
-    ctx.strokeStyle = "#000000";
-    ctx.lineWidth = 4;
-    ctx.strokeRect(2, 2, size - 4, size - 4);
+            const ctx = output.getContext("2d");
 
-    const link = document.createElement("a");
-    link.download = "Chorki-Permanent-QR.png";
-    link.href = output.toDataURL("image/png");
-    link.click();
-}
+            // White background
+
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, size, size);
+
+            // Draw QR Code
+
+            ctx.drawImage(canvas, border, border);
+
+            // Black border
+
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = 4;
+
+            ctx.strokeRect(2, 2, size - 4, size - 4);
+
+            // Download PNG
+
+            const link = document.createElement("a");
+
+            link.download = "Chorki-Permanent-QR.png";
+            link.href = output.toDataURL("image/png");
+
+            link.click();
+
+        }
+
+
+        // Generate default QR on page load
+
+        generateQR();
+
+
+        // Enter key support
+
+        document.getElementById("websiteURL")
+            .addEventListener("keydown", function(event) {
+
+                if (event.key === "Enter") {
+                    generateQR();
+                }
+
+            });
+
     </script>
 
 </body>
